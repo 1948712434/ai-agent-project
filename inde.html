@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>我的 AI 知识库助手</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; background: #f4f4f9; }
+        #chat-box { background: white; border-radius: 8px; padding: 20px; height: 400px; overflow-y: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .message { margin-bottom: 15px; padding: 10px; border-radius: 6px; line-height: 1.5; }
+        .user { background: #d1e7dd; text-align: right; }
+        .ai { background: #e2e3e5; text-align: left; }
+        .input-area { display: flex; gap: 10px; }
+        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; background: #0d6efd; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:disabled { background: #6c757d; }
+    </style>
+</head>
+<body>
+    <h2>🤖 前端转 AI 知识库助手</h2>
+    <div id="chat-box"></div>
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="输入你的问题，例如：专科生能做 AI 吗？" />
+        <button id="send-btn">发送</button>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-box');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        // 添加消息到界面的函数
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.innerText = text;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight; // 滚动到最底部
+        }
+
+        // 处理发送逻辑
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // 1. 显示用户的问题
+            addMessage(message, 'user');
+            userInput.value = '';
+            sendBtn.disabled = true;
+            sendBtn.innerText = '思考中...';
+
+            try {
+                // 2. 发送 HTTP 请求到我们的后端
+                const response = await fetch('http://localhost:3000/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                
+                // 3. 显示 AI 的回答
+                if (data.reply) {
+                    addMessage(data.reply, 'ai');
+                } else {
+                    addMessage('出错了：' + data.error, 'ai');
+                }
+            } catch (err) {
+                addMessage('网络请求失败，请检查后端是否启动。', 'ai');
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerText = '发送';
+            }
+        }
+
+        // 绑定事件
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
