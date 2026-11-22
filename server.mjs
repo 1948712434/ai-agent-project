@@ -64,7 +64,7 @@ const agent = createAgent({
 });
 
 // 前端对接口喊话
-fetch("http://localhost:3000/api/chat", {
+fetch("/api/chat", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({ message: "我是专科生" }), // 把问题传过去
