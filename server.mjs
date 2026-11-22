@@ -62,18 +62,25 @@ const agent = createAgent({
   model: model,
   tools: [loadDocumentTool, searchVectorDBTool],
 });
+// ⭐ 接收前端请求的核心 API 接口
+app.post("/api/chat", async (req, res) => {
+  const userMessage = req.body.message;
 
-// 前端对接口喊话
-fetch("/api/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ message: "我是专科生" }), // 把问题传过去
-})
-  .then((res) => res.json())
-  .then((data) => {
-    // 拿到后端的回答（也就是 server.mjs 里的 { reply: "..." }）
-    console.log(data.reply);
-  });
+  try {
+    // 强制让 Agent 每次先加载文档，再回答问题
+    const input = `请先加载 long-article.txt 文件。然后回答这个问题：${userMessage}`;
+
+    const result = await agent.invoke({
+      messages: [{ role: "user", content: input }],
+    });
+
+    // 把结果返回给前端
+    res.json({ reply: result.messages.at(-1).content });
+  } catch (error) {
+    console.error("Agent 运行出错:", error);
+    res.status(500).json({ error: error.message });
+  }
+});
 app.use(express.static("."));
 // 启动服务器
 const port = process.env.PORT || 3000;
