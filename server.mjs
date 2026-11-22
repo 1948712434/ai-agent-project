@@ -9,6 +9,12 @@ import { OpenAIEmbeddings } from "@langchain/openai";
 import { MemoryVectorStore } from "@langchain/classic/vectorstores/memory";
 import fs from "fs/promises";
 
+import path from "path";
+import { fileURLToPath } from "url";
+// 获取当前文件的绝对路径（兼容 ESM 模块）
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const app = express();
 app.use(cors());
 app.use(express.json()); // 允许接收 JSON 格式的请求体
@@ -81,9 +87,8 @@ app.post("/api/chat", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-app.use(express.static("."));
-// 启动服务器
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`🚀 服务器运行在端口 ${port}`);
+app.use(express.static(__dirname));
+// 2. 访问根路径时，直接返回 index.html
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
 });
