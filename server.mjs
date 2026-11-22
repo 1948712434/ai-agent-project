@@ -92,3 +92,9 @@ app.use(express.static(__dirname));
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
+
+// 启动服务器
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`🚀 服务器运行在端口 ${port}`);
+});
