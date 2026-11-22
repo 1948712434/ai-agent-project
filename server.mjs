@@ -74,7 +74,6 @@ fetch("http://localhost:3000/api/chat", {
     // 拿到后端的回答（也就是 server.mjs 里的 { reply: "..." }）
     console.log(data.reply);
   });
-
 app.use(express.static("."));
 // 启动服务器
 const port = process.env.PORT || 3000;
